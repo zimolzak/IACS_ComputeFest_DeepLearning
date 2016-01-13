@@ -99,6 +99,104 @@ can crash, so consider just plain python .py files."
 Interactive part
 ========
 
+[FYI all of this is really just logistic regression]
+
 Theano shared var = "data can be shared between the CPU and the GPU."
 So there is a .get_value() method on each one of those thingies. But
-train_set_y doesn't even have .get_data(). Why? 
+train_set_y doesn't even have .get_value(). Why? See ipy notebook.
+
+*exercise:* use np.mean and np.std
+
+solutions are in 2nd ver of the notebook called "executed"
+
+Note if you're "into performance" then don't do get_value or eval
+early on. But can also cause problems about recomputing same thing
+again and again. All due to the "computational graph." 
+
+[note, I think that once you do the mean / std dev thing, then you
+have to do `.eval()` instead of get_value. So inside your
+tile_raster_images function it'll have to do that.
+
+Resume
+-------
+
+Theano functions are another mysterious thing, besides shared
+variables. 
+
+Vars work like "this variable is a matrix of floats, this one is a
+vector of ints." Placeholders for your training data. Lets you make a
+compu graph for this network which has placeholders, and then new data
+can go in. 
+
+np.zeros((28*28, 10), ...) because there are 10 classes (10 digits).
+name='W' is mainly for debugging. borrow=True is kind of tricky. Only
+set to true because deep learning tutorial says it's OK. You really
+want to spend a week getting CUDA to work with it because then you can
+train in hours instead of days. 
+
+`error` in the code is mean misclassification rate. But gradient of
+that is nasty. So look at `error` but train with `cost`. `p_y_given_x`
+is a 10-vector. (Incidentally all 10 elements sum to 1.) There is a
+fair amount of "indexing magic" based on the whole idea that we're
+classifying digits. Earlier we called cost function "l" or the loss
+function. This code uses log(P(y|x)) AKA log likelihood. You can use
+other options for your cost function, stuff like cross entropy.
+
+[All this Theano stuff with `=` signs just builds the graph. Doesn't
+actually *do* anything.] `T.grad(cost=cost, wrt=W)` ... the "wrt" part
+means "with respect to." 0.001 is more realistic learning rate.
+
+Finally `theano.function`. **Take home point** is understanding
+`theano.function` and shared variables.
+
+"Epoch" is deep learning vocab. 10 epochs may not cut it. Bad
+performance because in *each* iteration you're calling the `.eval()`
+which is copying things from GPU to CPU. So instead copy things over
+*just once* by saying `foo = blah.eval()` and then referring to `foo`
+forever onwards.
+
+**exercise:** write a Theano func for basically y hat. We didn't do
+this exercise.
+
+Function that takes a shared variable
+--------
+
+Going to have code that looks like `theano.function(inputs=[],`....
+Where inputs is empty. Put the shared var into the `givens` parameter.
+Also now you are going to call the function like `train()`, and that's
+it. 
+
+Batch training: [sounds like kinda cheating] which is just estimating
+the gradient off of a sample, not off of the whole mess of examples.
+Screws you up if your data is sorted, so randomly shuffle your
+training examples before doing batch training.
+
+All the rest of this tutorial is sort of extra.
+
+Learning Rate Decay, and Q/A
+========
+
+Good to tune just this one parameter.
+
+Discussion of deep vs wide. Can in theory do any function with just a
+nearly infinitely wide layer. When you go from 1 to 2 layers, you
+could emulate that with just exponentially wider single layer. So
+that's why most people go deeper. 
+
+Exanple number of nodes seen in practice like 2000 2500 500. 50
+something layers has been done.
+
+Yes, we've only done one layer so far. But the adding layers is easy.
+You already know about `givens` etc., etc.
+
+Can play around with activation functions other than sigmoid.
+"rectified linear function" is max(x,0). 
+
+QA: does theano have nice wrapper functions for things like cross
+validation error?
+
+Can play with different initializations.
+
+When you do visualizing "hidden Unit Activations", you want it to look
+random. Stripes means 2 units the same, you failed to break symmetry.
+Black bar means you killed that unit.
