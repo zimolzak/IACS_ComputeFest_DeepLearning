@@ -1,0 +1,104 @@
+Deep learning
+========
+
+2016-01-13
+
+Verena Kaynig-Fittkau, github.com/vkaynig/
+
+Slides are in: Deep Learning – Part 1.pdf in the github repo.
+
+Intro: Why
+========
+
+Why deep learning? It works. 
+
+Google Brain found there were a lot of cats, a lot of human faces on
+youtube. Really unsupervised. NYTIMES 2012-06-26. Not 'grad student
+descent' which is what we used to have. Computer Vision Conferences
+are boring: now everybody says "we trained a convolutional...." You
+need hand designed features to train an SVM or whatever: a crude form
+of expert knowledge. Her grad stud project was detect neurons in
+electron microscopy. Tantalizing thing: I can see the neurons myself,
+so if I can just find the right features, the SVM will win! Deep
+learning is so called because several layers of features: edge
+detector, nose detector, face detector.
+
+"Recurrent" ANNs, sez recommended for NLP or time series.
+
+perceptron BBC documentary. 400 pixel sensor. Guy sitting there
+training with paper photos, and two switches. WRONG/RIGHT. MAN/WOMAN.
+
+SVM, RF, etc developed to deal with small data sets. And you need an
+annotator for ground truth. Don't do deep learning < 60,000 training
+examples (because other ML algos will outperform). DL would also be
+useful to leverage unlabeled data.
+
+More data more compute power these days. Supposedly can get just 1 or
+2 or 3 nvidia gpus and be close to n cores of Google Brain.
+
+Q/A: sort of did dev thing Spearmint to determine hyperparams like
+learning rate, etc, via Gaussian Processes.
+
+WHAT is deep learning then?
+========
+
+3x3 image --> 9-dim vector. No sense of "this pixel is above this
+one." Basics of ANNs, weights, bias unit, etc.... fire = s(b + w' *
+x). Where s(x) = sigmoid = 1/(1+exp(-cx)), kinda a substitute for step
+func. Then do W*x where W is matrix and w was a vector. For middle
+steps use s(). For last step use G().
+
+Nice thing: in theano we don't have to compute the gradient (and tell
+it to the software).
+
+*Interesting blackboard bit:* w and b are 2 vectors that define a
+hyperplane. Each image is a point (in N-dim space). Matrix W is a
+bunch of hyperplanes. In training, the (not yet) separating
+hyperplanes wriggle and shift til they hopefully do separate the
+classes. More efficient if you normalize your data. That is, you want
+the random initial weights to kind of land in the middle of your
+classes, so they don't have to shift and shift and shift all the same
+direction toward the bulk of your data.
+
+argmin_theta sum l(f(x, theta), y)
+
+x: features, theta: weights etc, y: ground truth train lables, f():
+applies theta to x to get yhat, l(): loss function. 
+
+stochastic gradient descent. Learning rate (step size) is (the most)
+important param to tune. We don't care that much about finding global
+min in fact. We want a decent local min that we can get to kind of
+fast. Smaller rate is more stable but slower. Yes, there are other
+things other than stochastic gradient descent.
+
+"Labels define your energy landscape and define what's better."
+
+Google Brain used "autoencoder". Idea is to reproduce input. It is
+supervised ML in the sense that it has labels, and the Input *is* the
+label.
+
+MNIST digit recognition. 
+
+See also torch, caffe, tensorflow (besides theano). She likes that
+Theano has transparent GPU integration. "high level on top": pylearn2.
+hard to install! or keras, lasagne, blocks. Torch = google deep mind,
+facebook ai, ibm. uses Lua, no python. caffe = c++, has "zoo" with
+pre-trained, like a model that already will do face recognition.
+tensorflow she says has good viz but performance issues. She hasn't
+switched. but worth keeping an eye on. 
+
+Misc QA
+========
+
+Why not python 3? Theano is really painful on windows + GPU + python
+3. 
+
+Also interesting perspective of "if you use notebook, your notebook
+can crash, so consider just plain python .py files."
+
+Interactive part
+========
+
+Theano shared var = "data can be shared between the CPU and the GPU."
+So there is a .get_value() method on each one of those thingies. But
+train_set_y doesn't even have .get_data(). Why? 
